@@ -1,12 +1,12 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.0.6'
+	id 'org.springframework.boot' version '3.1.1'
 	id 'io.spring.dependency-management' version '1.1.0'
 }
 
 group = 'net.decathlon'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '20'
 
 configurations {
 	compileOnly {
@@ -24,6 +24,11 @@ dependencies {
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
+
+
+var incubatorArguments = ["--enable-preview","--add-modules", "jdk.incubator.concurrent"]
+tasks.withType(JavaCompile) { options.compilerArgs += incubatorArguments }
+tasks.withType(Test) { jvmArgs += incubatorArguments }
 
 tasks.named('test') {
 	useJUnitPlatform()
