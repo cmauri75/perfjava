@@ -1,6 +1,8 @@
-FROM amazoncorretto:17-alpine
+FROM amazoncorretto:20-alpine
+ENV JAVA_OPTS=${JAVA_OPTS:-""}
+
 EXPOSE 8080
-COPY ./build/libs/LightJava-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY ./build/libs/perfjava-*-SNAPSHOT.jar /app/app.jar
 WORKDIR /app
 
-CMD ["java", "-jar", "app.jar"]
+CMD java ${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom --enable-preview -jar /app/app.jar

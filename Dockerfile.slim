@@ -1,22 +1,21 @@
-FROM amazoncorretto:17-alpine as corretto-deps
+FROM amazoncorretto:20-alpine as corretto-deps
 
-COPY ./build/libs/LightJava-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY ./build/libs/perfjava-*-SNAPSHOT.jar /app/app.jar
 
 RUN unzip /app/app.jar -d temp &&  \
     jdeps  \
       --print-module-deps \
       --ignore-missing-deps \
       --recursive \
-      --multi-release 17 \
+      --multi-release 20 \
       --class-path="./temp/BOOT-INF/lib/*" \
       --module-path="./temp/BOOT-INF/lib/*" \
       /app/app.jar > /modules.txt
 
-FROM amazoncorretto:17-alpine as corretto-jdk
+FROM amazoncorretto:20-alpine as corretto-jdk
 
 COPY --from=corretto-deps /modules.txt /modules.txt
 
-# hadolint ignore=DL3018,SC2046
 RUN apk add --no-cache binutils && \
     jlink \
      --verbose \
@@ -27,15 +26,15 @@ RUN apk add --no-cache binutils && \
      --compress=2 \
      --output /jre
 
-# hadolint ignore=DL3007
 FROM alpine:latest
+ENV JAVA_OPTS=${JAVA_OPTS:-""}
 ENV JAVA_HOME=/jre
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 COPY --from=corretto-jdk /jre $JAVA_HOME
 
 EXPOSE 8080
-COPY ./build/libs/LightJava-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY ./build/libs/perfjava-*-SNAPSHOT.jar /app/app.jar
 WORKDIR /app
 
-CMD ["java", "-jar", "app.jar"]
+CMD java ${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom --enable-preview -jar /app/app.jar

@@ -1,30 +1,37 @@
 # Getting Started
+Perfjava uses jdk20 with preview and incubator feature
+
 
 ## Dockerization
+Dockerization of images can be optimized using custom made JDK containing only used packages
+
 ### Core jar
 ```shell
-./gradlew bootRun
+./gradlew build
 ls -lh build/libs/*.jar | awk '{print $5, $9}'
 ```
-Jar size is: 18 Mb
+Jar size of opplication is: 26 Mb
 
 ### Dockerfile
 ```shell
 ./gradlew build
 
-docker build . -t lightjava:1.0.0 -f Dockerfile.plain
-docker run -p 8081:8080 lightjava:1.0.0
+docker build . -t perfjava:1.0.0 -f Dockerfile.plain
+docker run -p 8081:8080 perfjava:1.0.0
 
-docker build . -t lightjava:2.0.0 -f Dockerfile.slim
-docker run -p 8082:8080 lightjava:2.0.0
+docker build . -t perfjava:2.0.0 -f Dockerfile.slim
+docker run -p 8082:8080 perfjava:2.0.0
 
-docker image ls | grep light
+docker image ls | grep perfjava
 ```
 
-Original size: 356 Mb
+Results:
+* Original size: 331 Mb
+* Slim size: 92 Mb
 
-Slim size: 83 Mb
-
+NB: Use corretto for build in order to:
+1. avoid problem on cloud deploy (for example if you store secrets on vault and need to inject in you application runtime)
+2. use alpine machine for running, for example jre obtained from eclipse:temurin are not compatible so you need other bigger running machine to use that, debian:bookworm-slim is a candidate 
 
 ## Virtual Threads
 ```shell
