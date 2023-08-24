@@ -86,4 +86,3 @@ handleOrderStructuredConcurrency solves isses:
 * Observability — A thread dump would clearly display the task hierarchy, with the threads running updateInventory() and updateOrder() shown as children of the scope.
 
 
-
