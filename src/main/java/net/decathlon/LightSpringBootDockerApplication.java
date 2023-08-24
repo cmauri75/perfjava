@@ -1,5 +1,8 @@
+/* Decathlon Italy - Tacos Team(C) 2023 */
 package net.decathlon;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 import net.decathlon.service.ExternalServiceGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -9,9 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicLong;
 
 @SpringBootApplication
 public class LightSpringBootDockerApplication {
@@ -28,7 +28,8 @@ public class LightSpringBootDockerApplication {
         private final AtomicLong counter = new AtomicLong();
 
         @GetMapping("/")
-        public Greeting greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
+        public Greeting greeting(
+                @RequestParam(value = "name", defaultValue = "World") String name) {
             return new Greeting(counter.incrementAndGet(), String.format(template, name));
         }
 
@@ -46,7 +47,7 @@ public class LightSpringBootDockerApplication {
         }
     }
 
-    //Enables virtualthread management
+    // Enables virtualthread management
     @Bean
     TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
         return protocolHandler -> {
@@ -54,8 +55,5 @@ public class LightSpringBootDockerApplication {
         };
     }
 
-    public record Greeting(long counter, String data) {
-    }
-
-
+    public record Greeting(long counter, String data) {}
 }

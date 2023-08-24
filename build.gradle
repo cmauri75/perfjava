@@ -2,10 +2,12 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.1.3'
 	id 'io.spring.dependency-management' version '1.1.3'
+
+	id 'com.diffplug.spotless' version '6.19.0'
 }
 
 group = 'net.decathlon'
-version = '0.0.1-SNAPSHOT'
+version = '0.3.0-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_20
 
 configurations {
@@ -36,3 +38,21 @@ tasks.withType(Test) { jvmArgs += incubatorArguments }
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+spotless {
+	java {
+		importOrder()
+		removeUnusedImports()
+		cleanthat()
+		googleJavaFormat().aosp().reflowLongStrings()
+		formatAnnotations()
+		toggleOffOn()
+		licenseHeader '/* Decathlon Italy - Tacos Team(C) $YEAR */'
+	}
+}
+
+tasks.register('updateGitHooks', Copy) {
+	from './scripts/pre-commit'
+	into './.git/hooks'
+}
+compileJava.dependsOn updateGitHooks
