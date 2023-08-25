@@ -1,9 +1,9 @@
-/* Decathlon Italy - Tacos Team(C) 2023 */
-package net.decathlon;
+/* CMauri - Italy - 2023 */
+package net.perfjava;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
-import net.decathlon.service.ExternalServiceGateway;
+import net.perfjava.service.ExternalServiceGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-public class LightSpringBootDockerApplication {
+public class PerfjavaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(LightSpringBootDockerApplication.class, args);
+        SpringApplication.run(PerfjavaApplication.class, args);
     }
 
     @RestController

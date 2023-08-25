@@ -1,10 +1,12 @@
-/* Decathlon Italy - Tacos Team(C) 2023 */
-package net.decathlon;
+/* CMauri - Italy - 2023 */
+package net.perfjava;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 
-class LightJavaTests {
+@SpringBootTest
+class PerfJavaTests {
 
     @Test
     public void fluxTestingConcat() {

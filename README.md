@@ -37,12 +37,12 @@ NB: Use corretto for build in order to:
 ```shell
  ./gradlew compilejava
  
- java -cp ./build/classes/java/main --enable-preview net.decathlon.VirtualThreads C-T
- java -cp ./build/classes/java/main --enable-preview net.decathlon.VirtualThreads C-VT
- time java -cp ./build/classes/java/main --enable-preview net.decathlon.VirtualThreads T-T 10000
- time java -cp ./build/classes/java/main --enable-preview net.decathlon.VirtualThreads T-VT 10000
- java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.decathlon.VirtualThreads HOC
- java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.decathlon.VirtualThreads HOSC
+ java -cp ./build/classes/java/main --enable-preview net.perfjava.VirtualThreads C-T
+ java -cp ./build/classes/java/main --enable-preview net.perfjava.VirtualThreads C-VT
+ time java -cp ./build/classes/java/main --enable-preview net.perfjava.VirtualThreads T-T 10000
+ time java -cp ./build/classes/java/main --enable-preview net.perfjava.VirtualThreads T-VT 10000
+ java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.VirtualThreads HOC
+ java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.VirtualThreads HOSC
 ```
 
 ### Out of Memory Results

@@ -1,5 +1,5 @@
-/* Decathlon Italy - Tacos Team(C) 2023 */
-package net.decathlon;
+/* CMauri - Italy - 2023 */
+package net.perfjava;
 
 import java.time.Duration;
 import java.util.concurrent.*;
