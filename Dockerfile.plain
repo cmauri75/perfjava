@@ -1,8 +1,0 @@
-FROM amazoncorretto:20-alpine
-ENV JAVA_OPTS=${JAVA_OPTS:-""}
-
-EXPOSE 8080
-COPY ./build/libs/perfjava-*-SNAPSHOT.jar /app/app.jar
-WORKDIR /app
-
-CMD java ${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom --enable-preview -jar /app/app.jar

@@ -1,6 +1,16 @@
+FROM amazoncorretto:20-alpine as builder
+
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+COPY gradlew .
+COPY src src
+
+RUN ./gradlew build -x test
+
 FROM amazoncorretto:20-alpine as corretto-deps
 
-COPY ./build/libs/perfjava-*-SNAPSHOT.jar /app/app.jar
+COPY --from=builder ./build/libs/perfjava-*-SNAPSHOT.jar /app/app.jar
 
 RUN unzip /app/app.jar -d temp &&  \
     jdeps  \
@@ -16,6 +26,7 @@ FROM amazoncorretto:20-alpine as corretto-jdk
 
 COPY --from=corretto-deps /modules.txt /modules.txt
 
+#always include crypto modules otherwise ssl calls will fail (jdeps does not notice it presence because reflection hides it
 RUN apk add --no-cache binutils && \
     jlink \
      --verbose \
@@ -34,7 +45,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 COPY --from=corretto-jdk /jre $JAVA_HOME
 
 EXPOSE 8080
-COPY ./build/libs/perfjava-*-SNAPSHOT.jar /app/app.jar
+COPY --from=builder ./build/libs/perfjava-*-SNAPSHOT.jar /app/app.jar
 WORKDIR /app
 
 CMD java ${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom --enable-preview -jar /app/app.jar
