@@ -92,3 +92,8 @@ Plain vanilla java application running diffent test cases, after compile you can
  java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.virtualthreads.MainExecutor HOC
  java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.virtualthreads.MainExecutor HOSC
 ```
+
+## Virtual Threads in rest service
+
+See [Virtual Thread in Rest Service](README_VTRS.md)
+

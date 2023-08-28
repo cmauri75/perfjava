@@ -58,3 +58,10 @@ tasks.register('updateGitHooks', Copy) {
     into './.git/hooks'
 }
 compileJava.dependsOn updateGitHooks
+
+
+bootRun {
+    if ( project.hasProperty('jvmArgs') ) {
+        jvmArgs project.jvmArgs.split('\\s+')
+    }
+}

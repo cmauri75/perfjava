@@ -1,22 +1,35 @@
-# Use case
+# Virtual Threads in rest service use case
 
-User request --> BE (ask external service to send message) - lock - return
+# Use case description
+In typical use case we've a rest service that calls other low performance service, so lot of time is spent in I/O wait.
 
-Lot of requests, lot of threads in I/O wait lock.
+User request --> BE (ask external service to send message, locks, returns)
 
-Virtual Threads are threads managed by VM instead of linked to OS threads, very cheap to create and manage.
+Lot of requests means lot of threads in I/O wait lock.
 
-Planned to be included in September's JDK 21 and also available in the upcoming Spring Framework 6.1 (M1 now).
-
-It would be a replacement for Spring WebFlux (the most popular efficient reactive framework) for writing high-throughput concurrent applications with minimal code changes.
-
-WebFlux is great, the performance is fantastic, but:
+## Solution
+Typical solution is to use webflux that has fantastic performances, but:
 * Functional code may be difficult
 * Difficult to debug
 * Ugly stack trace
 * Clients/libs should be async/reactive as well
 
-Testing:
+## Alternative solution
+
+Virtual Threads are threads managed by VM instead of linked to OS threads, very cheap to create and manage.
+
+Planned to be included in September's JDK 21 and also available in the upcoming Spring Framework 6.1 (M4 now).
+
+It would be a replacement for Spring WebFlux (the most popular efficient reactive framework) for writing high-throughput concurrent applications with minimal code changes.
+
+We can enable it overriding default TomcatProtocolHandlerCustomizer method, changing executor.
+
+Starting with virtualthreads
+```shell
+./gradlew bootrun -PjvmArgs="-Dapp.useVirtualThread=true"
+```
+
+Testing is made using autocannon:
 ```shell
 npm install -g autocannon
 autocannon -c 5000 -d 5 http://localhost:8080/threading
@@ -55,4 +68,6 @@ Results with virtual threads:
 └───────────┴────────┴────────┴─────────┴─────────┴────────┴─────────┴────────┘
 </pre>
 
-Average requeste per seconds are 20x using virtual threads
+Average request per seconds are 20x using virtual threads and latency is half.
+
+Results are obtained with no need of code changes.
