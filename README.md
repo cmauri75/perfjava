@@ -53,9 +53,26 @@ Plain vanilla java application running diffent test cases, after compile you can
 * Out of memory test:
   * Starts one thread after another, till system goes out of memory. In M1 system just over 4,000 threads are supported
   * Same as before, but virtualthread are started. Not 2,800,000 threads are started, system does not crash but slows a lot. 700x load improvement is achieved.
+    
+|Technology|Max thread to crash|
+|:----------------|--------------------:|
+|Threads|4,000|
+|Virtual Threads|2,800,000|
+
 * Throughput test:
   * Run N thread each executing same job (200ms sleep) and check spent time. 10,000 takes 10 seconds with 200% CPU
   * Same as before with virtualthread. Time spent is 1 second with 700% CPU. 10x faster
+
+|Technology|Num of threads call|User Time [s]|System time [s]|cpu|Total time [s]|
+|:----------------|--------------------:|---------------|-----------------|------|----------------|
+|Threads|1,000|0.12|0.21|96%|0.343|
+|Threads|10,000|0.87|1.66|165%|1.277|
+|Threads|100,000|5.48|13.82|201%|10.01|
+|Threads|1,000,000|56.04|134.35|199%|1:35.92|
+|Virtual Threads|1,000|0.11|0.04|46%|0.326|
+|Virtual Threads|10,000|0.97|0.27|266%|0.46|
+|Virtual Threads|100,000|2.77|2.8|700%|1,029|
+|Virtual Threads|1,000,000|10.19|3.75|423%|3,2|
 
 **Test result is: much faster with better CPU utilization and much less memory needs**
 
@@ -75,52 +92,3 @@ Plain vanilla java application running diffent test cases, after compile you can
  java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.virtualthreads.MainExecutor HOC
  java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.virtualthreads.MainExecutor HOSC
 ```
-
-### Out of Memory Results
-
-Go up invoking threads till system crashes
-
-| Technology      |           Max thread to crash |
-|:----------------|------------------------------:|
-| Threads         |                         4.067 |
-| Virtual Threads |                     2.931.139 |
-
-
-### Througput load test
-
-One of the most common concurrency use cases is serving requests over the wire using a server. 
-For this, the preferred approach is the thread-per-request model, where a separate thread handles each request. 
-
-Throughput of such systems can be explained using Little’s law, which states that in a stable system, 
-the average concurrency (number of requests concurrently processed by the server), L, is equal to the throughput (average rate of requests), λ, times the latency (average duration of processing each request), W. 
-
-With this, you can derive that throughput equals average concurrency divided by latency (λ = L/W).
-
-
-| Technology      | Num of threads call | User Time [s] | System time [s] | cpu  | Total  |
-|:----------------|--------------------:|---------------|-----------------|------|--------|
-| Threads         |               1.000 | 0.13          | 0.13            | 78%  | 0.329  |
-| Threads         |              10.000 | 0.87          | 1.66            | 198% | 1.277  |
-| Threads         |             100.000 | 6.58          | 16.51s          | 216% | 10.688 |
-| Threads         |           1.000.000 | 66.04         | 165.35s         | 218% | 105.92 |
-| Virtual Threads         |               1.000 | 0.21          | 0.06            | 78%  | 0.347  |
-| Virtual Threads         |              10.000 | 1.30          | 0.31            | 298% | 0.542  |
-| Virtual Threads         |             100.000 | 5.33          | 2.66s           | 325% | 2.460  |
-| Virtual Threads         |           1.000.000 | 26.09         | 19.86s          | 260% | 17.667 |
-
-
-### Structured Concurrency
-
-We want updateInventory() and updateOrder() subtasks to be executed concurrently.
-Each of those can succeed or fail independently. Ideally, the handleOrder() method should fail if any subtask fails. However, if a failure occurs in one subtask, things get messy.
-
-* If updateInventory fails, inventory.get fails so I've to rollback updateOrder if it has finished ok
-* If order fast fails, inventory (if it's long running) waste lot of time, handleOrder should interrupt other job when one fails
-* If handleOrder is interrupted, the event is not propagated to subtasks
-
-handleOrderStructuredConcurrency solves isses:
-* Error handling with short-circuiting — If either the updateInventory() or updateOrder() fails, the other is canceled unless its already completed. This is managed by the cancellation policy implemented by ShutdownOnFailure(); other policies are possible.
-* Cancellation propagation — If the thread running handleOrder() is interrupted before or during the call to join(), both forks are canceled automatically when the thread exits the scope.
-* Observability — A thread dump would clearly display the task hierarchy, with the threads running updateInventory() and updateOrder() shown as children of the scope.
-
-
