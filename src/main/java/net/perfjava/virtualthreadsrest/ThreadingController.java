@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 public class ThreadingController {
@@ -17,8 +19,8 @@ public class ThreadingController {
 
   private static final String HELLO_TEMPLATE = "Hello, %s!. Using virtual threads? %s";
   private static final String THREAD_TEMPLATE = """
-          {"Result" : "%s"}
-          """;
+            {"Result" : "%s"}
+            """;
 
   private final AtomicLong counter = new AtomicLong();
 
@@ -36,7 +38,23 @@ public class ThreadingController {
 
   // THREADING
   @GetMapping(value = "/threading", produces = MediaType.APPLICATION_JSON_VALUE)
-  public String getResponse() {
-    return String.format(THREAD_TEMPLATE, externalServiceGateway.getResponse());
+  public String threading() {
+    return String.format(THREAD_TEMPLATE, externalServiceGateway.fakeGetResponse());
+  }
+
+  @GetMapping(value = "/fluxthreading", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Mono<String> fluxthreading() {
+    return Mono.just(String.format(THREAD_TEMPLATE, externalServiceGateway.fakeGetResponse()));
+  }
+
+  // SECOND USE CASE
+  @GetMapping(value = "/threading2", produces = MediaType.APPLICATION_JSON_VALUE)
+  public String threading2() {
+    return externalServiceGateway.getRealResponse();
+  }
+
+  @GetMapping(value = "/fluxthreading2", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Flux<String> fluxthreading2() {
+    return externalServiceGateway.getRealFluxResponse();
   }
 }
