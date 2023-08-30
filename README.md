@@ -1,17 +1,15 @@
 # Project 
 This repo contains various hints and scenario to optimize spring boot java development:
 1. Create a size optimized docker image
-2. Test of virtual threads in terms of performance and load management
-3. Implementation of timeout budgeting
+2. Usage of structured concurrency
+3. Test of virtual threads in terms of performance and load management
 
 # Getting Started
 
 ## Prerequisites
-Here the software pre-requisites for every case:
-1. slim/docker
-   * Functional docker or docker-style install
-2. virtualthreads
-   * jdk20 install
+To run examples you need:
+* Docker
+* JDK 20 distribution
 
 # Size-optimized Dockerization
 Dockerization of images can be optimized using custom-made JDK containing only used packages.
@@ -48,20 +46,57 @@ NB: Use corretto for build in order to:
 1. avoid problem on cloud deploy (for example if you store secrets on vault and need to inject in you application runtime)
 2. use alpine machine for running, for example jre obtained from eclipse:temurin are not compatible so you need other bigger running machine to use that, debian:bookworm-slim is a candidate 
 
+## Structured concurrency
+SC has been introduced in Java19: 
+>Enhance the maintainability, reliability, and observability of multithreaded code by adopting a concurrent programming style that reduces the likelihood of thread leaks and cancellation delays, which are common risks associated with cancellation and shutdown.
+
+In example a tipical use case:
+* A task can be split in 2 parts. If I do in parallel using ScheduledThreadPoolExecutor if first fail before second has finished, second finish it's work in any case (or viceversa).
+* Using StructuredTaskScope.ShutdownOnFailure() as soon as first fails, second is stopped because no need to waste resources completing it. This is the case **I need both to be completed**
+* Using StructuredTaskScope.ShutdownOnSuccess() as soon as first finish, second is stopped because no need to waste resources completing it. This is the case **I just need one of them to be completed, for example if I have multiple provider and ask data from all of them at once**
+
+Example execution:
+```shell
+ ./gradlew compilejava
+ 
+ java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.virtualthreads.MainExecutor HOC
+ java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.virtualthreads.MainExecutor HOSC
+```
+
+
 ## Virtual Threads
-Plain vanilla java application running diffent test cases, after compile you can execute:
-* Out of memory test:
+### Out of memory test
+In this case we start infinite number of no-terminating threads and wait until system crashes.
   * Starts one thread after another, till system goes out of memory. In M1 system just over 4,000 threads are supported
   * Same as before, but virtualthread are started. Not 2,800,000 threads are started, system does not crash but slows a lot. 700x load improvement is achieved.
-    
+
+```shell
+ ./gradlew compilejava
+ 
+  java -cp ./build/classes/java/main --enable-preview net.perfjava.virtualthreads.MainExecutor C-T
+  java -cp ./build/classes/java/main --enable-preview net.perfjava.virtualthreads.MainExecutor C-VT
+```
+
+Results:
+
 |Technology|Max thread to crash|
 |:----------------|--------------------:|
 |Threads|4,000|
 |Virtual Threads|2,800,000|
 
-* Throughput test:
-  * Run N thread each executing same job (200ms sleep) and check spent time. 10,000 takes 10 seconds with 200% CPU
-  * Same as before with virtualthread. Time spent is 1 second with 700% CPU. 10x faster
+### Throughput test:
+In this use-case we start a fixed number of threads that finishs after a while and check how much time and resources the code takes to finish all jobs.
+
+  * Run N thread each executing same job (200ms sleep) and check spent time. 
+  * Same as before with virtualthread.
+
+Execution code (replace XXXXXX with the number of threads)
+```shell
+ ./gradlew compilejava
+ 
+ time java -cp ./build/classes/java/main --enable-preview net.perfjava.virtualthreads.MainExecutor T-T XXXXXX
+ time java -cp ./build/classes/java/main --enable-preview net.perfjava.virtualthreads.MainExecutor T-VT XXXXXX
+```
 
 |Technology|Num of threads call|User Time [s]|System time [s]|cpu|Total time [s]|
 |:----------------|--------------------:|---------------|-----------------|------|----------------|
@@ -74,24 +109,9 @@ Plain vanilla java application running diffent test cases, after compile you can
 |Virtual Threads|100,000|2.77|2.8|700%|1,029|
 |Virtual Threads|1,000,000|10.19|3.75|423%|3,2|
 
-**Test result is: much faster with better CPU utilization and much less memory needs**
+Evidence says: **As load grows VT is much faster with better CPU utilization (and much less memory needs)**
 
-* Structured concurrency:
-  * A task can be split in 2 parts. Using ScheduledThreadPoolExecutor first fail before second has finished, second finished it's work
-  * Using StructuredTaskScope.ShutdownOnFailure() as soon as first fails, second is stopped because no need to waste resources completing it because I need both to be completed
-  * Using StructuredTaskScope.ShutdownOnSuccess() as soon as first finish, second is stopped because no need to waste resources completing it because I just need one of them to be completed, case I have multiple
-
-
-```shell
- ./gradlew compilejava
- 
- java -cp ./build/classes/java/main --enable-preview net.perfjava.virtualthreads.MainExecutor C-T
- java -cp ./build/classes/java/main --enable-preview net.perfjava.virtualthreads.MainExecutor C-VT
- time java -cp ./build/classes/java/main --enable-preview net.perfjava.virtualthreads.MainExecutor T-T 100000
- time java -cp ./build/classes/java/main --enable-preview net.perfjava.virtualthreads.MainExecutor T-VT 100000
- java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.virtualthreads.MainExecutor HOC
- java -cp ./build/classes/java/main --enable-preview --add-modules jdk.incubator.concurrent net.perfjava.virtualthreads.MainExecutor HOSC
-```
+In case of huge load BT vantage is more than one order of magnitude (30x)
 
 ## Virtual Threads in rest service
 
