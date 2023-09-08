@@ -117,3 +117,6 @@ In case of huge load BT vantage is more than one order of magnitude (30x)
 
 See [Virtual Thread in Rest Service](README_VTRS.md)
 
+## Bonus: AspectJ PerformanceMonitorInterceptor
+
+See [AspectJ Monitor Interceptor](README_AJMI.md)

@@ -1,2 +1,9 @@
 app:
   useVirtualThread: false
+
+logging:
+  level:
+    net:
+      perfjava:
+        aopmonitor: trace
+

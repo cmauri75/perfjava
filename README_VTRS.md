@@ -1,6 +1,6 @@
 # Virtual Threads in rest service use case
 
-# Use case description
+## Use case description
 In typical use case we've a rest service that calls other low performance service, so lot of time is spent in I/O wait.
 
 User request --> BE (ask external service to send message, locks, returns)
